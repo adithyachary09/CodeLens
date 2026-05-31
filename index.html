@@ -1,0 +1,1437 @@
+
+
+
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>CodeLens ⚡ | AI Code Complexity Analyzer</title> <!-- Google Fonts & Highlight.js --> <link href="https://fonts.googleapis.com
+
+pasted
+
+I'll give u my index.html code, so all i want u to gen that code again in more & most best looking frontend possible, the best designs u can do do that it should be authentic, efficient & aesthetic also professional, ur are free to add/edit/del the things shown in the current file, but edit in a pro dev edits; and regen the entire code here;
+
+3:23 PM
+
+Prepared to redesign frontend with professional aesthetic standards
+Prepared to redesign frontend with professional aesthetic standards
+Here's what got a complete redesign and why each choice was made:
+
+Aesthetic direction — "Obsidian Editorial" A deep navy-black base (
+#06090F) with a dot-grid background that gives it depth without noise. The standout choice is a chartreuse lime (
+#CAFF00) accent — electric against dark, completely unlike the typical blue/purple dev tool palette. Mint green (
+#00E5A0) handles success/optimized states, amber warnings, coral errors.
+
+Typography Barlow Condensed 900 for the wordmark (italic on "Lens" for personality), Barlow for UI prose, and JetBrains Mono for all code and data — a pairing with real character, zero generic vibes.
+
+Key improvements over the original:
+
+Live line number panel — syncs scroll with the textarea, updates on every keystroke
+Severity stripe — each function card has a top-edge color bar (mint/amber/coral) so complexity severity is visible at a glance before you read anything
+Animated complexity meter — a thin bar inside each card fills on reveal using a spring easing (cubic-bezier(0.16, 1, 0.3, 1))
+Focus glow on editor — the entire editor panel gets a lime border + shadow on focus
+Keyboard shortcuts — Ctrl+Enter to analyze, Ctrl+L to clear, displayed in the footer
+Language → filename binding — selecting Python shows main.py in the mock tab bar
+Load Sample button — paste a two-function demo code instantly
+hljs.highlightElement() instead of highlightAll() — precise, no flicker on re-analysis
+Animate-in stagger — function cards slide up with animation-delay offsets per card
+
+Index
+Code · HTML 
+
+
+
+
+
+Incognito chats aren’t saved, added to memory, or used to train models.
+
+
+raw
+Index · HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeLens — AI Code Complexity Analyzer</title>
+ 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,800&family=Barlow:wght@300;400;500&family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+ 
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+        :root {
+            --bg:          #06090F;
+            --surf:        #0C1018;
+            --surf2:       #111722;
+            --surf3:       #18202E;
+            --border:      #1C2840;
+            --border2:     #243351;
+            --text:        #DDE4F5;
+            --text2:       #7A8BAD;
+            --text3:       #3D4F6E;
+            --lime:        #CAFF00;
+            --lime-a12:    rgba(202,255,0,0.12);
+            --lime-a25:    rgba(202,255,0,0.25);
+            --mint:        #00E5A0;
+            --mint-a10:    rgba(0,229,160,0.10);
+            --mint-a25:    rgba(0,229,160,0.25);
+            --amber:       #FFB400;
+            --amber-a10:   rgba(255,180,0,0.10);
+            --amber-a25:   rgba(255,180,0,0.25);
+            --coral:       #FF5252;
+            --coral-a10:   rgba(255,82,82,0.10);
+            --coral-a25:   rgba(255,82,82,0.25);
+            --r:           6px;
+            --r-lg:        10px;
+        }
+ 
+        html { scroll-behavior: smooth; }
+ 
+        body {
+            font-family: 'Barlow', sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 1px 1px, #13213A 1px, transparent 0);
+            background-size: 28px 28px;
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+ 
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+ 
+        /* ══════════════════════════════════════
+           HEADER
+        ══════════════════════════════════════ */
+ 
+        .page-header {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 2.5rem 2.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+ 
+        .brand-logo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: clamp(3rem, 6vw, 5rem);
+            line-height: 0.88;
+            letter-spacing: -1.5px;
+            text-transform: uppercase;
+            color: var(--text);
+        }
+ 
+        .brand-logo em {
+            font-style: italic;
+            color: var(--lime);
+        }
+ 
+        .brand-sub {
+            margin-top: 6px;
+            font-size: 0.72rem;
+            font-weight: 400;
+            color: var(--text3);
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+ 
+        .header-pills {
+            display: flex;
+            gap: 8px;
+            padding-top: 6px;
+            align-items: center;
+        }
+ 
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0.22rem 0.6rem;
+            border-radius: 100px;
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            border: 1px solid var(--border);
+            color: var(--text2);
+            background: var(--surf);
+        }
+ 
+        .pill-live {
+            border-color: var(--lime-a25);
+            color: var(--lime);
+            background: var(--lime-a12);
+        }
+ 
+        .pill-live::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            background: var(--lime);
+            border-radius: 50%;
+            animation: blink 2s ease-in-out infinite;
+        }
+ 
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+ 
+        /* accent line under header */
+        .header-accent {
+            max-width: 1440px;
+            margin: 1.5rem auto 0;
+            padding: 0 2.5rem;
+        }
+ 
+        .header-accent-inner {
+            height: 1px;
+            background: linear-gradient(90deg, var(--lime-a25) 0%, var(--border) 50%, transparent 100%);
+        }
+ 
+        /* ══════════════════════════════════════
+           MAIN
+        ══════════════════════════════════════ */
+ 
+        main {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 2rem 2.5rem 5rem;
+        }
+ 
+        /* Section label */
+        .sec-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+.sec-title{
+    padding-left:2px;
+}
+ 
+        .sec-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text3);
+        }
+ 
+        .sec-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text3);
+        }
+ 
+        .sec-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+ 
+        /* ══════════════════════════════════════
+           EDITOR
+        ══════════════════════════════════════ */
+ 
+        .editor-wrap {
+            background: var(--surf);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+ 
+        .editor-wrap:focus-within {
+            border-color: var(--lime-a25);
+            box-shadow: 0 0 0 1px var(--lime-a12), 0 0 40px rgba(202,255,0,0.03);
+        }
+ 
+        .editor-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6rem 1rem;
+            background: var(--surf2);
+            border-bottom: 1px solid var(--border);
+        }
+ 
+        .editor-dots {
+            display: flex;
+            gap: 6px;
+        }
+ 
+        .editor-dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.editor-dots span:nth-child(1){
+    background:#ff5f57;
+    box-shadow:0 0 8px rgba(255,95,87,0.35);
+}
+
+.editor-dots span:nth-child(2){
+    background:#febc2e;
+    box-shadow:0 0 8px rgba(254,188,46,0.35);
+}
+
+.editor-dots span:nth-child(3){
+    background:#28c840;
+    box-shadow:0 0 8px rgba(40,200,64,0.35);
+}
+ 
+        .editor-filename {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text2);
+        }
+ 
+        .editor-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+ 
+        .char-pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text3);
+            background: var(--surf3);
+            border: 1px solid var(--border);
+            padding: 2px 7px;
+            border-radius: 100px;
+        }
+ 
+        .editor-inner {
+            display: flex;
+        }
+ 
+        .line-nums {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text3);
+            padding: 1rem 0.75rem;
+            text-align: right;
+            background: var(--surf2);
+            border-right: 1px solid var(--border);
+            min-width: 48px;
+            user-select: none;
+            pointer-events: none;
+            overflow: hidden;
+        }
+ 
+        .line-nums span { display: block; }
+ 
+        #code-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            resize: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text);
+            padding: 1rem 1.25rem;
+            min-height: 240px;
+            tab-size: 4;
+            caret-color: var(--lime);
+        }
+ 
+        #code-input::placeholder {
+            color: var(--text3);
+            font-style: italic;
+        }
+ 
+        /* ══════════════════════════════════════
+           BOTTOM BAR
+        ══════════════════════════════════════ */
+ 
+        .editor-bottombar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+ 
+        .bottombar-left { display: flex; gap: 8px; }
+ 
+        .bottombar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+ 
+        select.sel {
+            background: var(--surf);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: 'Barlow', sans-serif;
+            font-size: 0.82rem;
+            padding: 0.42rem 2rem 0.42rem 0.75rem;
+            border-radius: var(--r);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%237A8BAD' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+ 
+        select.sel:hover, select.sel:focus { border-color: var(--border2); }
+ 
+        .btn-ghost {
+            background: var(--surf);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            font-family: 'Barlow', sans-serif;
+            font-size: 0.82rem;
+            padding: 0.42rem 0.85rem;
+            border-radius: var(--r);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+ 
+        .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+ 
+        .kbd-hint {
+            font-size: 0.7rem;
+            color: var(--text3);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+ 
+        kbd {
+            background: var(--surf2);
+            border: 1px solid var(--border2);
+            border-radius: 3px;
+            padding: 1px 5px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text3);
+        }
+ 
+        .btn-analyze {
+            background: var(--lime);
+            color: #05080D;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.55rem 1.75rem;
+            border: none;
+            border-radius: var(--r);
+            cursor: pointer;
+            transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+ 
+        .btn-analyze::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(
+        120deg,
+        transparent,
+        rgba(255,255,255,0.18),
+        transparent
+    );
+    transform:translateX(-120%);
+}
+
+.btn-analyze::after {
+    content: '→';
+    transition: transform 0.2s;
+}
+
+.btn-analyze:hover::before{
+    transform:translateX(120%);
+    transition:1s;
+}
+ 
+        .btn-analyze:hover {
+            background: #D8FF1A;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(202,255,0,0.22);
+        }
+ 
+        .btn-analyze:hover::after { transform: translateX(3px); }
+        .btn-analyze:active { transform: translateY(0); box-shadow: none; }
+        .btn-analyze:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+ 
+        /* ══════════════════════════════════════
+           ERROR
+        ══════════════════════════════════════ */
+ 
+        .error-box {
+            background: var(--coral-a10);
+            border: 1px solid var(--coral-a25);
+            color: #FF8585;
+            border-radius: var(--r);
+            padding: 0.7rem 1rem;
+            font-size: 0.83rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+ 
+        /* ══════════════════════════════════════
+           LOADING
+        ══════════════════════════════════════ */
+ 
+        #loading {
+            display: none;
+            padding: 3.5rem 0;
+        }
+ 
+        .loader-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+ 
+        .loader-track {
+            position: relative;
+            width: 48px;
+            height: 48px;
+        }
+ 
+        .loader-ring {
+            width: 48px;
+            height: 48px;
+            border: 2px solid var(--border2);
+            border-top-color: var(--lime);
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+        }
+ 
+        .loader-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: var(--lime);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: blink 1.2s ease-in-out infinite;
+        }
+ 
+        @keyframes spin { to { transform: rotate(360deg); } }
+ 
+        .loader-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--text2);
+        }
+ 
+        .loader-label::after {
+            content: '';
+            animation: ellipsis 1.5s steps(4, end) infinite;
+        }
+ 
+        @keyframes ellipsis {
+            0%,20%  { content: ''; }
+            40%     { content: '.'; }
+            60%     { content: '..'; }
+            80%,100%{ content: '...'; }
+        }
+        /* ══════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════ */
+
+.empty-state{
+    border:1px dashed var(--border);
+    background:rgba(255,255,255,0.015);
+    border-radius:var(--r-lg);
+    padding:4rem 2rem;
+    text-align:center;
+    margin-bottom:2rem;
+    animation:fadeUp 0.4s ease;
+}
+
+.empty-icon{
+    width:64px;
+    height:64px;
+    margin:0 auto 1.2rem;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.5rem;
+    background:var(--lime-a12);
+    border:1px solid var(--lime-a25);
+    color:var(--lime);
+    box-shadow:0 0 30px rgba(202,255,0,0.05);
+}
+
+.empty-title{
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:1.3rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--text);
+    margin-bottom:0.6rem;
+}
+
+.empty-sub{
+    max-width:580px;
+    margin:0 auto;
+    color:var(--text3);
+    font-size:0.84rem;
+    line-height:1.8;
+}
+
+        /* ══════════════════════════════════════
+           RESULTS
+        ══════════════════════════════════════ */
+ 
+        #results {
+            display: none;
+            animation: fadeUp 0.25s ease both;
+        }
+ 
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+ 
+        .lang-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.28rem 0.8rem;
+            background: var(--lime-a12);
+            border: 1px solid var(--lime-a25);
+            border-radius: 100px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--lime);
+            margin-bottom: 1.5rem;
+        }
+ 
+        /* ── Function cards ── */
+        .func-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+ 
+        .func-card {
+            background: var(--surf);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: 1.25rem 1.25rem 1rem;
+            transition: border-color 0.2s;
+            animation: fadeUp 0.4s ease both;
+            overflow: hidden;
+            position: relative;
+        }
+ 
+        .func-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--border2);
+        }
+ 
+        .func-card.severity-low::before   { background: var(--mint); }
+        .func-card.severity-mid::before   { background: var(--amber); }
+        .func-card.severity-high::before  { background: var(--coral); }
+ 
+        .func-card:hover { border-color: var(--border2); }
+ 
+        .func-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.83rem;
+            color: var(--text);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+ 
+        .fn-tag {
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 1px 5px;
+            border-radius: 3px;
+            letter-spacing: 0.04em;
+            background: var(--lime-a12);
+            color: var(--lime);
+            border: 1px solid var(--lime-a25);
+        }
+ 
+        .meter {
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+ 
+        .meter-fill {
+            height: 100%;
+            border-radius: 2px;
+            width: 0;
+            transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+ 
+        .meter-fill.low  { background: var(--mint); }
+        .meter-fill.mid  { background: var(--amber); }
+        .meter-fill.high { background: var(--coral); }
+ 
+        .cx-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+ 
+        .cx-label {
+            font-size: 0.7rem;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+        }
+ 
+        .cx-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 500;
+            padding: 0.18rem 0.55rem;
+            border-radius: 4px;
+        }
+ 
+        .cx-badge.low  { background: var(--mint-a10);  color: var(--mint);  border: 1px solid var(--mint-a25);  }
+        .cx-badge.mid  { background: var(--amber-a10); color: var(--amber); border: 1px solid var(--amber-a25); }
+        .cx-badge.high { background: var(--coral-a10); color: var(--coral); border: 1px solid var(--coral-a25); }
+ 
+        .cx-note {
+            font-size: 0.7rem;
+            color: var(--text3);
+            margin-top: 0.25rem;
+            line-height: 1.45;
+        }
+ 
+        /* ── Analysis row ── */
+        .analysis-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+ 
+        @media (max-width: 820px) { .analysis-row { grid-template-columns: 1fr; } }
+ 
+        .a-card {
+            background: var(--surf);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: 1.25rem;
+        }
+ 
+        .a-card-head {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text2);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+ 
+        .a-card-head-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+ 
+        .icon-warn { background: var(--amber-a10); color: var(--amber); }
+        .icon-tip  { background: var(--mint-a10);  color: var(--mint);  }
+ 
+        .patterns-ul {
+            list-style: none;
+        }
+ 
+        .patterns-ul li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 0.83rem;
+            color: var(--text2);
+            padding: 0.42rem 0;
+            border-bottom: 1px solid var(--border);
+            line-height: 1.5;
+        }
+ 
+        .patterns-ul li:last-child { border-bottom: none; }
+ 
+        .patterns-ul li .arrow {
+            flex-shrink: 0;
+            margin-top: 2px;
+            font-size: 0.7rem;
+            color: var(--amber);
+        }
+ 
+        .patterns-ul li.ok .arrow { color: var(--mint); }
+ 
+        .opt-text {
+            font-size: 0.83rem;
+            color: var(--text2);
+            line-height: 1.75;
+        }
+ 
+        /* ── Code diff ── */
+        .diff-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+ 
+        @media (max-width: 900px) { .diff-grid { grid-template-columns: 1fr; } }
+ 
+        .code-pane {
+            background: var(--surf);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+        }
+ 
+        .code-pane.optimized {
+            border-color: rgba(0,229,160,0.18);
+        }
+ 
+        .pane-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.55rem 1rem;
+            background: var(--surf2);
+            border-bottom: 1px solid var(--border);
+        }
+ 
+        .code-pane.optimized .pane-head {
+            background: rgba(0,229,160,0.04);
+            border-bottom-color: rgba(0,229,160,0.15);
+        }
+ 
+        .pane-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 0.75rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text2);
+        }
+ 
+        .code-pane.optimized .pane-title { color: var(--mint); }
+ 
+        .pane-tag {
+            font-size: 0.65rem;
+            padding: 1px 7px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            color: var(--text3);
+            background: var(--surf3);
+        }
+ 
+        .btn-copy {
+            background: transparent;
+            border: 1px solid rgba(0,229,160,0.25);
+            color: var(--mint);
+            font-family: 'Barlow', sans-serif;
+            font-size: 0.72rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+ 
+        .btn-copy:hover { background: var(--mint-a10); }
+ 
+        .code-pane pre {
+            margin: 0;
+            padding: 1rem;
+            overflow-x: auto;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+ 
+        .code-pane code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+ 
+        /* override hljs bg so our surface shows */
+        .hljs { background: transparent !important; }
+ 
+        /* ══════════════════════════════════════
+           FOOTER
+        ══════════════════════════════════════ */
+ 
+        .page-footer {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 1.25rem 2.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+ 
+        .footer-left {
+            font-size: 0.72rem;
+            color: var(--text3);
+        }
+ 
+        .footer-left strong {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: var(--text2);
+            text-transform: uppercase;
+        }
+ 
+        .shortcuts {
+            display: flex;
+            gap: 1.25rem;
+        }
+ 
+        .shortcut {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.68rem;
+            color: var(--text3);
+        }
+ 
+        /* ══════════════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════════════ */
+ 
+        @media (max-width: 620px) {
+            .page-header { flex-direction: column; gap: 1rem; padding: 1.5rem 1.25rem 0; }
+            main { padding: 1.5rem 1.25rem 4rem; }
+            .brand-logo { font-size: 3rem; }
+            .editor-bottombar { flex-direction: column; align-items: stretch; }
+            .bottombar-right { justify-content: flex-end; }
+            .shortcuts { display: none; }
+            .page-footer { padding: 1rem 1.25rem; }
+            .header-accent { padding: 0 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+ 
+    <!-- PAGE HEADER -->
+    <header class="page-header">
+        <div>
+            <div class="brand-logo">Code<em>Lens</em></div>
+            <div class="brand-sub">Know your complexity before your interviewer does</div>
+        </div>
+        <div class="header-pills">
+            <span class="pill">v2.0</span>
+            <span class="pill pill-live">API Ready</span>
+        </div>
+    </header>
+ 
+    <div class="header-accent"><div class="header-accent-inner"></div></div>
+ 
+    <!-- MAIN CONTENT -->
+    <main>
+ 
+        <!-- ─── SECTION 01: INPUT ─── -->
+        <div class="sec-label" style="margin-top: 2rem;">
+            <span class="sec-title">Paste your code</span>
+        </div>
+ 
+        <div id="error-box" class="error-box"></div>
+ 
+        <div class="editor-wrap" id="editor-wrap">
+            <div class="editor-topbar">
+                <div class="editor-dots">
+                    <span></span><span></span><span></span>
+                </div>
+                <div class="editor-filename" id="editor-filename">
+    Code Editor
+</div>
+                <div class="editor-meta">
+                    <span class="char-pill" id="char-count">0 chars</span>
+                </div>
+            </div>
+            <div class="editor-inner">
+                <div class="line-nums" id="line-nums"><span>1</span></div>
+                <textarea
+    id="code-input"
+    class="code-editor-input"
+    spellcheck="false"
+    autocomplete="off"
+    autocorrect="off"
+    autocapitalize="off"
+    placeholder="# Paste Python, Java, C++, or JavaScript here..."></textarea>
+            </div>
+        </div>
+ 
+        <div class="editor-bottombar">
+            <div class="bottombar-left">
+                <select class="sel" id="lang-select">
+                    <option value="auto" selected>Auto-detect</option>
+                    <option value="python">Python</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="java">Java</option>
+                    <option value="cpp">C++</option>
+                    <option value="typescript">TypeScript</option>
+                    <option value="go">Go</option>
+                    <option value="rust">Rust</option>
+                </select>
+                <button class="btn-ghost" onclick="loadSample()">Load sample ↓</button>
+                <button class="btn-ghost" onclick="clearEditor()">Clear</button>
+            </div>
+            <div class="bottombar-right">
+                <span class="kbd-hint">
+                    <kbd>Ctrl</kbd>+<kbd>Enter</kbd>&nbsp;to analyze
+                </span>
+                <button class="btn-analyze" id="analyze-btn" onclick="analyzeCode()">Analyze</button>
+            </div>
+        </div>
+ 
+        <!-- LOADING -->
+        <div id="loading">
+            <div class="loader-inner">
+                <div class="loader-track">
+                    <div class="loader-ring"></div>
+                    <div class="loader-dot"></div>
+                </div>
+                <span class="loader-label">Analyzing complexity</span>
+            </div>
+        </div>
+ 
+        <!-- ─── RESULTS ─── -->
+        <div class="empty-state" id="empty-state">
+    <div class="empty-icon">⌘</div>
+    <div class="empty-title">
+        AI Complexity Analysis Ready
+    </div>
+    <div class="empty-sub">
+        Paste your source code and analyze performance,
+        optimization opportunities, and algorithmic complexity.
+    </div>
+</div>
+
+<div id="results">
+ 
+            <!-- SECTION 02: ANALYSIS -->
+            <div class="sec-label" style="margin-top: 0.5rem;">
+                <span class="sec-num">02</span>
+                <span class="sec-title">Complexity analysis</span>
+            </div>
+ 
+            <div id="lang-tag" class="lang-tag"></div>
+ 
+            <!-- Function cards -->
+            <div class="func-grid" id="func-grid"></div>
+ 
+            <!-- Patterns + Optimization -->
+            <div class="analysis-row">
+                <div class="a-card">
+                    <div class="a-card-head">
+                        <span class="a-card-head-icon icon-warn">⚠</span>
+                        Inefficient Patterns
+                    </div>
+                    <ul class="patterns-ul" id="patterns-ul"></ul>
+                </div>
+                <div class="a-card">
+                    <div class="a-card-head">
+                        <span class="a-card-head-icon icon-tip">💡</span>
+                        Optimization Strategy
+                    </div>
+                    <p class="opt-text" id="opt-text"></p>
+                </div>
+            </div>
+ 
+            <!-- SECTION 03: CODE DIFF -->
+            <div class="sec-label">
+                <span class="sec-num">03</span>
+                <span class="sec-title">Before &amp; after</span>
+            </div>
+ 
+            <div class="diff-grid">
+                <div class="code-pane">
+                    <div class="pane-head">
+                        <span class="pane-title">Original</span>
+                        <span class="pane-tag">input</span>
+                    </div>
+                    <pre><code id="original-code" class="language-plaintext"></code></pre>
+                </div>
+                <div class="code-pane optimized">
+                    <div class="pane-head">
+                        <span class="pane-title">Optimized</span>
+                        <button class="btn-copy" id="copy-btn" onclick="copyOptimized()">Copy</button>
+                    </div>
+                    <pre><code id="optimized-code" class="language-plaintext"></code></pre>
+                </div>
+            </div>
+ 
+        </div><!-- /results -->
+ 
+    </main>
+ 
+    <!-- FOOTER -->
+    <footer class="page-footer">
+        <span class="footer-left">
+    <strong>CodeLens</strong> — AI-Powered Code Complexity Analyzer
+</span>
+        <div class="shortcuts">
+            <span class="shortcut"><kbd>Ctrl</kbd><kbd>Enter</kbd> Analyze</span>
+            <span class="shortcut"><kbd>Ctrl</kbd><kbd>L</kbd> Clear</span>
+        </div>
+    </footer>
+ 
+    <script>
+        /* ── CONFIG ── */
+        const API_URL = "https://codelens-api-49sn.onrender.com/analyze";
+ 
+        
+ 
+        const SAMPLE_CODE = `def find_duplicate(arr):
+    for i in range(len(arr)):
+        for j in range(i + 1, len(arr)):
+            if arr[i] == arr[j]:
+                return arr[i]
+    return None
+ 
+def compute_prefix_sum(nums):
+    prefix = []
+    total = 0
+    for n in nums:
+        total += n
+        prefix.append(total)
+    return prefix`;
+ 
+        /* ── DOM REFS ── */
+        const textarea    = document.getElementById('code-input');
+        const lineNums    = document.getElementById('line-nums');
+        const charCount   = document.getElementById('char-count');
+        const langSelect  = document.getElementById('lang-select');
+        const analyzeBtn  = document.getElementById('analyze-btn');
+        const errorBox    = document.getElementById('error-box');
+        const loading     = document.getElementById('loading');
+        const results     = document.getElementById('results');
+const emptyState  = document.getElementById('empty-state');
+ 
+        /* ── EDITOR HELPERS ── */
+        function updateEditor() {
+            const lines = textarea.value.split('\n');
+            lineNums.innerHTML = lines.map((_, i) => `<span>${i + 1}</span>`).join('');
+            charCount.textContent = `${textarea.value.length} chars`;
+        }
+ 
+        textarea.addEventListener('input', updateEditor);
+        textarea.addEventListener('scroll', () => { lineNums.scrollTop = textarea.scrollTop; });
+        
+        updateEditor();
+ 
+        function loadSample() {
+            textarea.value = SAMPLE_CODE;
+            langSelect.value = 'python';
+            
+            updateEditor();
+        }
+ 
+        function clearEditor() {
+            textarea.value = '';
+            updateEditor();
+            results.style.display = 'none';
+            errorBox.style.display = 'none';
+        }
+ 
+        /* ── KEYBOARD SHORTCUTS ── */
+        document.addEventListener('keydown', e => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); analyzeCode(); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'l')     { e.preventDefault(); clearEditor(); }
+        });
+ 
+        /* ── COMPLEXITY HELPERS ── */
+        function complexityLevel(str) {
+            const s = str.toLowerCase();
+            if (s.includes('o(1)') || s.includes('o(log')) return 'low';
+            if (s.includes('o(n)') || s.includes('o(n log') || s.includes('o(n log')) return 'mid';
+            return 'high';
+        }
+ 
+        function meterWidth(lvl) {
+            return { low: '22%', mid: '55%', high: '88%' }[lvl];
+        }
+ 
+        function extractNotation(str) {
+
+    const m = str.match(/O\([^)]+\)/i);
+
+    return m
+        ? m[0]
+        : str.split('-')[0].trim();
+}
+
+function extractNote(str) {
+
+    const idx = str.indexOf(' - ');
+
+    return idx !== -1
+        ? str.slice(idx + 3)
+        : '';
+}
+ 
+        function detectCodeLanguage(code){
+
+    const patterns = {
+        python: /(def |import |print\(|elif |self)/,
+        javascript: /(function|console\.log|=>|let |const |var )/,
+        java: /(public class|System\.out\.println|public static void main|public int |private int |String\[\]|ArrayList|HashMap)/,
+        cpp: /(#include|std::|cout<<|cin>>)/,
+        typescript: /(: string|: number|interface |type )/,
+        go: /(package main|fmt\.Println|func main)/,
+        rust: /(fn main|println!|let mut )/
+    };
+
+    for(const lang in patterns){
+        if(patterns[lang].test(code)){
+            return lang;
+        }
+    }
+
+    return "unknown";
+}
+ 
+        /* ── MAIN ANALYZE ── */
+        async function analyzeCode() {
+            const code = textarea.value.trim();
+            const lang = langSelect.value;
+ 
+            if (!code) {
+    showError('Please paste some code first.');
+    return;
+}
+
+const detectedLang = detectCodeLanguage(code);
+
+if(
+    lang !== "auto" &&
+    detectedLang !== "unknown" &&
+    detectedLang !== lang
+){
+
+    showError(
+    `Language mismatch detected between selected language and pasted code.`
+);
+
+    const autoBtn = document.createElement('button');
+
+autoBtn.textContent = 'Use Auto-detect';
+
+autoBtn.style.marginTop = '10px';
+autoBtn.style.background = 'var(--lime)';
+autoBtn.style.border = 'none';
+autoBtn.style.color = '#05080D';
+autoBtn.style.padding = '6px 12px';
+autoBtn.style.borderRadius = '6px';
+autoBtn.style.cursor = 'pointer';
+autoBtn.style.fontWeight = '600';
+
+autoBtn.onclick = () => {
+    document.getElementById('lang-select').value = 'auto';
+    analyzeCode();
+};
+
+errorBox.appendChild(document.createElement('br'));
+errorBox.appendChild(document.createElement('br'));
+errorBox.appendChild(autoBtn);
+
+    return;
+}
+ 
+            results.style.display = 'none';
+            errorBox.style.display = 'none';
+            emptyState.style.display = 'none';
+            loading.style.display = 'block';
+            analyzeBtn.disabled = true;
+ 
+            try {
+                const controller = new AbortController();
+
+const timeout = setTimeout(() => {
+    controller.abort();
+}, 25000);
+
+const res  = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, language: lang }),
+signal: controller.signal
+});
+
+clearTimeout(timeout);
+                const data = await res.json();
+ 
+                if (!res.ok) throw new Error(data.detail || 'Failed to analyze code.');
+ 
+                populateResults(code, data, lang);
+                loading.style.display = 'none';
+                results.style.display = 'block';
+                results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+ 
+            } catch (err) {
+                loading.style.display = 'none';
+                showError(
+    err.name === 'AbortError'
+        ? 'Request timeout. Backend took too long to respond.'
+        : err.message
+);
+            } finally {
+                analyzeBtn.disabled = false;
+            }
+        }
+ 
+        function showError(msg) {
+            errorBox.textContent = msg;
+            errorBox.style.display = 'block';
+        }
+ 
+        /* ── POPULATE RESULTS ── */
+        function populateResults(originalCode, data, selectedLang) {
+            /* Language tag */
+            const langTag = document.getElementById('lang-tag');
+            const displayLang = selectedLang === 'auto' ? 'Auto-detected' : selectedLang.toUpperCase();
+            langTag.textContent = `↳ ${displayLang}`;
+ 
+            /* Function cards */
+            const grid = document.getElementById('func-grid');
+            grid.innerHTML = '';
+ 
+            (data.functions || []).forEach((fn, i) => {
+                const time  = data.time_complexity?.[fn]  || 'Unknown';
+                const space = data.space_complexity?.[fn] || 'Unknown';
+                const timeLvl  = complexityLevel(time);
+                const spaceLvl = complexityLevel(space);
+                const overallLvl = timeLvl === 'high' ? 'high' : timeLvl === 'mid' ? 'mid' : spaceLvl;
+                const timeNote  = extractNote(time);
+                const spaceNote = extractNote(space);
+ 
+                const card = document.createElement('div');
+                card.className = `func-card severity-${overallLvl}`;
+                card.style.animationDelay = `${i * 0.07}s`;
+                card.innerHTML = `
+                    <div class="func-name"><span class="fn-tag">fn</span>${fn}</div>
+                    <div class="meter"><div class="meter-fill ${timeLvl}" style="width:0" data-w="${meterWidth(timeLvl)}"></div></div>
+                    <div class="cx-row">
+                        <span class="cx-label">Time</span>
+                        <span class="cx-badge ${timeLvl}">${extractNotation(time)}</span>
+                    </div>
+                    ${timeNote ? `<p class="cx-note">${timeNote}</p>` : ''}
+                    <div class="cx-row" style="margin-top:0.6rem">
+                        <span class="cx-label">Space</span>
+                        <span class="cx-badge ${spaceLvl}">${extractNotation(space)}</span>
+                    </div>
+                    ${spaceNote ? `<p class="cx-note">${spaceNote}</p>` : ''}
+                `;
+                grid.appendChild(card);
+            });
+ 
+            /* Animate meter fills */
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    document.querySelectorAll('.meter-fill').forEach(el => {
+                        el.style.width = el.dataset.w;
+                    });
+                });
+            });
+ 
+            /* Patterns */
+            const ul = document.getElementById('patterns-ul');
+            ul.innerHTML = '';
+            const pats = data.inefficient_patterns || [];
+            if (pats.length > 0) {
+                pats.forEach(p => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span class="arrow">→</span>${p}`;
+                    ul.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.className = 'ok';
+                li.innerHTML = `<span class="arrow">✓</span>No glaring inefficiencies detected.`;
+                ul.appendChild(li);
+            }
+ 
+            /* Optimization text */
+            document.getElementById('opt-text').textContent = data.optimization_explanation || '';
+ 
+            /* Code diff */
+            const origEl = document.getElementById('original-code');
+            const optEl  = document.getElementById('optimized-code');
+ 
+            origEl.textContent = originalCode;
+            optEl.textContent  = data.optimized_code || '';
+ 
+            const hlLang = selectedLang !== 'auto' ? `language-${selectedLang}` : 'language-plaintext';
+            origEl.className = hlLang;
+            optEl.className  = hlLang;
+ 
+            origEl.removeAttribute('data-highlighted');
+            optEl.removeAttribute('data-highlighted');
+
+            hljs.highlightElement(origEl);
+            hljs.highlightElement(optEl);
+        }
+ 
+        /* ── COPY OPTIMIZED ── */
+        function copyOptimized() {
+            const code = document.getElementById('optimized-code').textContent;
+            const btn  = document.getElementById('copy-btn');
+            navigator.clipboard.writeText(code).then(() => {
+                const prev = btn.textContent;
+                btn.textContent = 'Copied ✓';
+                btn.style.color = 'var(--lime)';
+                btn.style.borderColor = 'var(--lime-a25)';
+                setTimeout(() => {
+                    btn.textContent = prev;
+                    btn.style.color = '';
+                    btn.style.borderColor = '';
+                }, 2200);
+            });
+        }
+    </script>
+ 
+</body>
+</html>
