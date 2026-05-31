@@ -50,6 +50,7 @@ Index · HTML
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeLens — AI Code Complexity Analyzer</title>
+    <link rel="icon" type="image/jpeg" href="./logo.jpg">
  
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -114,6 +115,19 @@ Index · HTML
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+        }
+ 
+        .brand-logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+ 
+        .brand-icon {
+            width: clamp(2.8rem, 5.5vw, 4.5rem);
+            height: clamp(2.8rem, 5.5vw, 4.5rem);
+            object-fit: contain;
+            border-radius: 6px;
         }
  
         .brand-logo {
@@ -958,7 +972,10 @@ Index · HTML
     <!-- PAGE HEADER -->
     <header class="page-header">
         <div>
-            <div class="brand-logo">Code<em>Lens</em></div>
+            <div class="brand-logo-wrap">
+                <img src="./logo.jpg" alt="CodeLens Logo" class="brand-icon">
+                <div class="brand-logo">Code<em>Lens</em></div>
+            </div>
             <div class="brand-sub">Know your complexity before your interviewer does</div>
         </div>
         <div class="header-pills">
